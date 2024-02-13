@@ -29,7 +29,7 @@ type MatchHandler struct {
 
 func (h *MatchHandler) Routes() chi.Router {
 	inMemRepository := repository.NewInMemRepository()
-	sqlLiteMatchRepository := repository.NewMySQLHourRepository()
+	sqlLiteMatchRepository := repository.MySqliteRepository()
 	matchHandler := NewMatchHandler(inMemRepository)
 
 	router := chi.NewRouter()

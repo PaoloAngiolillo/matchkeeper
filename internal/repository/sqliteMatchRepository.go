@@ -11,15 +11,15 @@ import (
 //	Availability string    `db:"availability"`
 //}
 
-type MySQLHourRepository struct {
+type MySqliteRepository struct {
 	db *sql.DB
 }
 
-func NewMySQLHourRepository(db *sql.DB) *MySQLHourRepository {
+func NewMySQLHourRepository(db *sql.DB) *MySqliteRepository {
 	if db == nil {
 		panic("missing db")
 	}
-	return &MySQLHourRepository{db: db}
+	return &MySqliteRepository{db: db}
 }
 
 // sqlContextGetter is an interface provided both by transaction and standard db connection

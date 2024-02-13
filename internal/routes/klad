@@ -1,0 +1,38 @@
+match := models.Match{
+		Id: 1,
+		HomeTeam: models.Team{
+			Id: 10,
+			PlayerOne: models.Player{
+				Id:        1,
+				FirstName: "PlayerOne",
+				LastName:  "Home",
+			},
+			PlayerTwo: models.Player{
+				Id:        2,
+				FirstName: "PlayerTwo",
+				LastName:  "Home",
+			},
+		},
+		OpposingTeam: models.Team{
+			Id: 11,
+			PlayerOne: models.Player{
+				Id:        3,
+				FirstName: "PlayerOne",
+				LastName:  "Opposing",
+			},
+			PlayerTwo: models.Player{
+				Id:        4,
+				FirstName: "PlayerTwo",
+				LastName:  "Opposing",
+			},
+		},
+		Score: models.Score{
+			Id:                1,
+			HomeTeamScore:     9,
+			OpposingTeamScore: 7,
+		},
+		CreatedDate: time.Time{},
+	}
+
+	jsonMatch, _ := json.Marshal(match)
+	fmt.Println(jsonMatch)

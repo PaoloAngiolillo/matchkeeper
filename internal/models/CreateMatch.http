@@ -1,0 +1,64 @@
+
+POST http://localhost:8080/match
+Content-Type: application/json
+
+{
+    "id": 1,
+    "home_team": {
+      "id": 10,
+      "player_one": {
+        "id": 1,
+        "first_name": "PlayerOne",
+        "last_name": "Home"
+      },
+      "player_two": {
+        "id": 2,
+        "first_name": "PlayerTwo",
+        "last_name": "Home"
+      }
+    },
+    "opposing_team": {
+      "id": 11,
+      "player_one": {
+        "id": 3,
+        "first_name": "PlayerOne",
+        "last_name": "Opposing"
+      },
+      "player_two": {
+        "id": 4,
+        "first_name": "PlayerTwo",
+        "last_name": "Opposing"
+      }
+    },
+    "score": {
+      "id": 1,
+      "home_team_score": 9,
+      "opposing_team_score": 7
+    }
+  }
+
+###
+
+POST http://localhost:8080/match
+Content-Type: application/json
+
+{
+    "id": 1
+}
+
+###
+
+POST http://localhost:8080/match
+Content-Type: application/json
+
+{
+  "match": {
+    "id": 1,
+    "created_date": "1995-01-01T00:00:00Z"
+  }}
+
+
+###
+GET http://localhost:8080/match
+Accept: application/json
+

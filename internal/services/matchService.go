@@ -1,12 +1,11 @@
-package routes
+package services
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/render"
+	"matchkeeper/internal/database"
 	"matchkeeper/internal/models"
 	"matchkeeper/internal/repository"
 	"net/http"
@@ -23,41 +22,35 @@ func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("404 Not Found"))
 }
 
-type MatchHandler struct {
+type MatchService struct {
 	repository repository.MatchRepository
 }
 
-func (h *MatchHandler) Routes() chi.Router {
-	inMemRepository := repository.NewInMemRepository()
-	sqlLiteMatchRepository := repository.MySqliteRepository()
-	matchHandler := NewMatchHandler(inMemRepository)
+var db = database.New()
 
+func (mh *MatchService) Routes() chi.Router {
 	router := chi.NewRouter()
-	router.Use(middleware.RequestID)
-	router.Use(middleware.Logger)
-	router.Use(middleware.Recoverer)
-	router.Use(middleware.URLFormat)
-	router.Use(render.SetContentType(render.ContentTypeJSON))
-	router.Get("/", matchHandler.List)
-	router.Post("/", matchHandler.Create)
-	router.Put("/", matchHandler.Update)
+
+	router.Get("/", mh.List)
+	router.Post("/", mh.Create)
+	router.Put("/", mh.Update)
 
 	router.Route("/{id}", func(r chi.Router) {
-		r.Get("/", matchHandler.Get)
-		r.Put("/", matchHandler.Update)
-		r.Delete("/", matchHandler.Delete)
+		r.Get("/", mh.Get)
+		r.Put("/", mh.Update)
+		r.Delete("/", mh.Delete)
 	})
 	return router
 }
 
-func NewMatchHandler(s repository.MatchRepository) *MatchHandler {
-	return &MatchHandler{
-		repository: s,
+func NewMatchService(mr repository.MatchRepository) *MatchService {
+	return &MatchService{
+		repository: mr,
 	}
 }
 
-func (h *MatchHandler) List(w http.ResponseWriter, r *http.Request) {
-	matches, err := h.repository.List()
+func (mh *MatchService) List(w http.ResponseWriter, r *http.Request) {
+	matches, err := mh.repository.List()
 	fmt.Println(matches)
 	jsonBytes, err := json.Marshal(matches)
 	if err != nil {
@@ -70,7 +63,7 @@ func (h *MatchHandler) List(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonBytes)
 }
 
-func (h *MatchHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (mh *MatchService) Create(w http.ResponseWriter, r *http.Request) {
 	// Match object that will be populated from json payload
 	var match models.Match
 
@@ -79,7 +72,7 @@ func (h *MatchHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.repository.Create(match); err != nil {
+	if err := mh.repository.Create(match); err != nil {
 		InternalServerErrorHandler(w, r)
 		return
 	}
@@ -91,7 +84,7 @@ func (h *MatchHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *MatchHandler) Get(w http.ResponseWriter, r *http.Request) {
+func (mh *MatchService) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	convertedId, err := strconv.Atoi(id)
 	if err != nil {
@@ -99,7 +92,7 @@ func (h *MatchHandler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	match, err := h.repository.Get(convertedId)
+	match, err := mh.repository.Get(convertedId)
 	if err != nil {
 		if errors.Is(err, repository.NotFoundErr) {
 			NotFoundHandler(w, r)
@@ -121,10 +114,10 @@ func (h *MatchHandler) Get(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Get Match"))
 }
 
-func (h *MatchHandler) Update(w http.ResponseWriter, r *http.Request) {
+func (mh *MatchService) Update(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Update Match"))
 }
 
-func (h *MatchHandler) Delete(w http.ResponseWriter, r *http.Request) {
+func (mh *MatchService) Delete(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Delete Match"))
 }

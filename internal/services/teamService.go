@@ -1,4 +1,4 @@
-package routes
+package services
 
 import (
 	"net/http"
@@ -6,9 +6,9 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-type TeamHandler struct{}
+type TeamService struct{}
 
-func (t TeamHandler) Routes() chi.Router {
+func (t TeamService) Routes() chi.Router {
 	router := chi.NewRouter()
 
 	router.Get("/", t.List)
@@ -23,22 +23,22 @@ func (t TeamHandler) Routes() chi.Router {
 	return router
 }
 
-func (t TeamHandler) List(w http.ResponseWriter, r *http.Request) {
+func (t TeamService) List(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("List Teams"))
 }
 
-func (t TeamHandler) Get(w http.ResponseWriter, r *http.Request) {
+func (t TeamService) Get(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Get Teams"))
 }
 
-func (t TeamHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (t TeamService) Create(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Create Teams"))
 }
 
-func (t TeamHandler) Update(w http.ResponseWriter, r *http.Request) {
+func (t TeamService) Update(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Update Teams"))
 }
 
-func (t TeamHandler) Delete(w http.ResponseWriter, r *http.Request) {
+func (t TeamService) Delete(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Delete Match"))
 }

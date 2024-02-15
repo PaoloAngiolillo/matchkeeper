@@ -2,21 +2,29 @@ package server
 
 import (
 	"encoding/json"
+	"github.com/go-chi/render"
 	"log"
+	"matchkeeper/internal/repository"
 	"net/http"
 
-	"matchkeeper/internal/routes"
+	"matchkeeper/internal/services"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
-	matchHandler := routes.MatchHandler{}
-	teamHandler := routes.TeamHandler{}
-	playerHandler := routes.PlayerHandler{}
+	sqliteMatchRepository := repository.NewMySQLMatchRepository(&s.db)
+	matchHandler := services.NewMatchService(sqliteMatchRepository)
+
+	teamHandler := services.TeamService{}
+	playerHandler := services.PlayerService{}
 	r := chi.NewRouter()
+	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.URLFormat)
+	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	r.Get("/", s.HelloWorldHandler)
 	r.Get("/health", s.healthHandler)

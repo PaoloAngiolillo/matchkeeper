@@ -14,11 +14,7 @@ import (
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
-	sqliteMatchRepository := repository.NewMySQLMatchRepository(&s.db)
-	matchHandler := services.NewMatchService(sqliteMatchRepository)
 
-	teamHandler := services.TeamService{}
-	playerHandler := services.PlayerService{}
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
@@ -28,9 +24,22 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	r.Get("/", s.HelloWorldHandler)
 	r.Get("/health", s.healthHandler)
-	r.Mount("/match", matchHandler.Routes())
-	r.Mount("/team", teamHandler.Routes())
-	r.Mount("/player", playerHandler.Routes())
+	r.Mount("/", s.mountSubroutes())
+	return r
+}
+
+func (s *Server) mountSubroutes() chi.Router {
+	r := chi.NewRouter()
+	sqliteMatchRepository := repository.NewMySqliteMatchRepository(&s.db)
+	sqlitePlayerRepository := repository.NewMySqlitePlayerRepository(&s.db)
+	matchService := services.NewMatchService(sqliteMatchRepository)
+	playerService := services.NewPlayerService(sqlitePlayerRepository)
+
+	teamService := services.TeamService{}
+	r.Mount("/match", matchService.Routes())
+	r.Mount("/team", teamService.Routes())
+	r.Mount("/player", playerService.Routes())
+
 	return r
 }
 

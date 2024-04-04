@@ -1,13 +1,15 @@
 package repository
 
 import (
+	"context"
 	"matchkeeper/internal/models"
 )
 
 type MatchRepository interface {
-	List() (map[int]models.Match, error)
-	Get(id int) (models.Match, error)
-	Update(id int, match models.Match) error
-	Delete(id int) error
-	Create(match models.Match) error
+	List(ctx context.Context) (map[int]models.Match, error)
+	GetById(ctx context.Context, id int) (models.Match, error)
+	Update(ctx context.Context, id int, match models.Match) interface{}
+	Delete(ctx context.Context, id int) interface{}
+	Create(ctx context.Context, match models.Match) interface{}
 }
+

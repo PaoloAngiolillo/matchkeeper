@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-chi/chi/v5"
-	"matchkeeper/internal/database"
+	"log"
 	"matchkeeper/internal/models"
 	"matchkeeper/internal/repository"
 	"net/http"
@@ -26,14 +26,11 @@ type MatchService struct {
 	repository repository.MatchRepository
 }
 
-var db = database.New()
-
 func (mh *MatchService) Routes() chi.Router {
 	router := chi.NewRouter()
 
 	router.Get("/", mh.List)
 	router.Post("/", mh.Create)
-	router.Put("/", mh.Update)
 
 	router.Route("/{id}", func(r chi.Router) {
 		r.Get("/", mh.Get)
@@ -43,14 +40,14 @@ func (mh *MatchService) Routes() chi.Router {
 	return router
 }
 
-func NewMatchService(mr repository.MatchRepository) *MatchService {
+func NewMatchService(mr *repository.MySqliteMatchRepository) *MatchService {
 	return &MatchService{
 		repository: mr,
 	}
 }
 
 func (mh *MatchService) List(w http.ResponseWriter, r *http.Request) {
-	matches, err := mh.repository.List()
+	matches, err := mh.repository.List(r.Context())
 	fmt.Println(matches)
 	jsonBytes, err := json.Marshal(matches)
 	if err != nil {
@@ -72,7 +69,7 @@ func (mh *MatchService) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := mh.repository.Create(match); err != nil {
+	if err := mh.repository.Create(r.Context(), match); err != nil {
 		InternalServerErrorHandler(w, r)
 		return
 	}
@@ -92,7 +89,7 @@ func (mh *MatchService) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	match, err := mh.repository.Get(convertedId)
+	match, err := mh.repository.GetById(r.Context(), convertedId)
 	if err != nil {
 		if errors.Is(err, repository.NotFoundErr) {
 			NotFoundHandler(w, r)
@@ -115,9 +112,51 @@ func (mh *MatchService) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (mh *MatchService) Update(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Update Match"))
+	// Extract the match ID from the URL parameter
+	id := chi.URLParam(r, "id")
+	convertedId, err := strconv.Atoi(id)
+	if err != nil {
+		NotFoundHandler(w, r)
+		return
+	}
+
+	// Decode the JSON payload from the request body into a Match object
+	var match models.Match
+	if err := json.NewDecoder(r.Body).Decode(&match); err != nil {
+		log.Println(err)
+		InternalServerErrorHandler(w, r)
+		return
+	}
+	fmt.Println(match.Id, match.HomeTeam, match.OpposingTeam, match.Score)
+	// Call the Update method on the MatchRepository with the context, match ID, and the Match object
+	if err := mh.repository.Update(r.Context(), convertedId, match); err != nil {
+		InternalServerErrorHandler(w, r)
+		return
+	}
+
+	// If everything is successful, send a response back to the client
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Match updated successfully"))
 }
 
 func (mh *MatchService) Delete(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Delete Match"))
+	// Extract the match ID from the URL parameter
+	id := chi.URLParam(r, "id")
+	convertedId, err := strconv.Atoi(id)
+	if err != nil {
+		NotFoundHandler(w, r)
+		return
+	}
+
+	// Call the Delete method on the MatchRepository with the context and match ID
+	if err := mh.repository.Delete(r.Context(), convertedId); err != nil {
+		InternalServerErrorHandler(w, r)
+		return
+	}
+
+	// If everything is successful, send a response back to the client
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Match deleted successfully"))
 }

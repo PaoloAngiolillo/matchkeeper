@@ -3,39 +3,65 @@ POST http://localhost:8080/match
 Content-Type: application/json
 
 {
-    "id": 1,
     "home_team": {
-      "id": 10,
       "player_one": {
-        "id": 1,
         "first_name": "PlayerOne",
         "last_name": "Home"
       },
       "player_two": {
-        "id": 2,
         "first_name": "PlayerTwo",
         "last_name": "Home"
       }
     },
     "opposing_team": {
-      "id": 11,
       "player_one": {
-        "id": 3,
         "first_name": "PlayerOne",
         "last_name": "Opposing"
       },
       "player_two": {
-        "id": 4,
         "first_name": "PlayerTwo",
         "last_name": "Opposing"
       }
     },
     "score": {
-      "id": 1,
       "home_team_score": 9,
       "opposing_team_score": 7
     }
   }
+
+###
+PUT http://localhost:8080/match/1
+Content-Type: application/json
+
+{
+  "home_team": {
+    "player_one": {
+      "id": 1,
+      "first_name": "PlayerOneUpdated",
+      "last_name": "Home"
+    },
+    "player_two": {
+      "first_name": "PlayerTwo",
+      "last_name": "Home"
+    }
+  },
+  "opposing_team": {
+    "player_one": {
+      "first_name": "PlayerOne",
+      "last_name": "Opposing"
+    },
+    "player_two": {
+      "id": 2,
+      "first_name": "PlayerTwoUpdated",
+      "last_name": "Opposing"
+    }
+  },
+  "score": {
+    "home_team_score": 9,
+    "opposing_team_score": 7
+  }
+}
+
 
 ###
 
